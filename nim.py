@@ -6,10 +6,13 @@
 # Outputs: Displays the current game board to the players in the console or errors if appropriate
 
 # Collaborators: None
-# Sources: ChatGPT, FIXME probably more
+# Sources: ChatGPT
 
 # Author: Marie Biernacki
 # Creation Date: September 12th, 2025
+
+#needed to create a copy of the currentBoard for comparison
+import copy
 
 # function to determine if the game is over
 # SOURCE: Myself
@@ -23,8 +26,10 @@ def gameOver(currentBoard):
     for row in range(len(currentBoard)):
         # iterate through each col of that row
         for col in range(len(currentBoard[row])):
-            # increment the total stars by 1
-            totalStars += 1
+            # if the col has a star
+            if currentBoard[row][col] == "*":
+                # increment the total stars by 1
+                totalStars += 1
 
     #if the total stars is still 0 after the for loop, return true
     if totalStars == 0:
@@ -33,53 +38,78 @@ def gameOver(currentBoard):
     else:
         return False
 
+# function to check if the currentBoard and updatedBoard are equal
+# SOURCE: Myself
+def boardsAreEqual(currentBoard, updatedBoard):
+
+    # use a for loop to iterate through the currentBoard and updatedBoard to compare values
+
+    # iterate through the 2D array of the currentBoard using a for loop
+    # first, iterate through each row
+    for row in range(len(currentBoard)):
+        # iterate through each col of that row
+        for col in range(len(currentBoard[row])):
+            # compare the value of the currentBoard with the value of the updatedBoard
+            # if they are not equal, return False
+            if currentBoard[row][col] != updatedBoard[row][col]:
+               return False
+
+    # after the for loop runs, return True
+    return True
+
+
+
 # function to update the current game board
 # SOURCE: ChatGPT, Myself
-# FIXME need to update the board with empty strings?
 def updateBoard(currentBoard, rowNum, starNum):
-    # convert user input to 0-based index
+    newBoard = copy.deepcopy(currentBoard)
     rowIndex = rowNum - 1
 
-    # safety check: is rowNum valid?
-    if rowIndex < 0 or rowIndex >= len(currentBoard):
-        return currentBoard
+    # Find indices of actual stars in the row
+    starIndices = [i for i, val in enumerate(newBoard[rowIndex]) if val == '*']
 
-    rowLength = len(currentBoard[rowIndex])
+    # Remove stars from the **end** of the row
+    for i in range(min(starNum, len(starIndices))):
+        newBoard[rowIndex][starIndices[-1 - i]] = ' '
 
-    # remove stars from the right side
-    for i in range(starNum):
-        colIndex = rowLength - 1 - i
-        if colIndex >= 0:
-            currentBoard[rowIndex][colIndex] = " "
-
-    return currentBoard
+    return newBoard
 
 
-
+# function to obtain input from the current player, verify inputs, and update the board appropriately
+# SOURCE: Myself
 def playerPrompt(playerNum, currentBoard):
     # display the player number
-    print(f"Player {playerNum}'s turn")
+    print(f"\nPlayer {playerNum}")
 
     # obtain the row number and the number of stars to remove from the current player
     rowNum = input("Enter a row number: ")
-    starNum = input("Stars to remove from the row: ")
+    starNum = input("Stars to remove: ")
 
-    # FIXME verify the input are integers? create a separate function to do this?
-    #if not isInteger(rowNum, starNum): print ("ERROR - rowNum and starNum must be integers" and return the currentBoard)
+    # verify the input rowNum and starNum are integers
+    # print appropriate error messages and return the currentBoard as needed
+    if not rowNum.isdigit():
+        print("ERROR -- Row number must be an integer.")
+        return currentBoard
+
+    if not starNum.isdigit():
+        print("ERROR -- Star number must be an integer.")
+        return currentBoard
+
     # if the move is valid
-    if isValidMove(currentBoard, int(rowNum), int(starNum)) == True:
-        # update the board
-        print("FIXME UPDATE BOARD HERE")
+    if isValidMove(currentBoard, int(rowNum), int(starNum)):
+        # call updateBoard function to update, store the results in newBoard and return
         newBoard = updateBoard(currentBoard, int(rowNum), int(starNum))
         return newBoard
+
+    # otherwise the move is not valid
     else:
-        print("ERROR -- No changes made to board")
+        # display an error message and return the currentBoard
+        print("ERROR: Invalid move")
         return currentBoard
 
 
 # function to determine if the current move is valid
 # SOURCE: Myself
-# FIXME: add features to verify rowNum and starNum are integers?
 def isValidMove(currentBoard, rowNum, starNum):
 
     # check that the rowNum is a valid option (can only be 1 through 5)
@@ -99,8 +129,8 @@ def isValidMove(currentBoard, rowNum, starNum):
             # iterate through each col of that row
             for col in range(len(currentBoard[row])):
 
-                # if the value is not equal to an empty space
-                if currentBoard[row][col] != " ":
+                # if the value is equal to a *
+                if currentBoard[row][col] == "*":
                     # increment the starCount by 1
                     starCount += 1
 
@@ -110,7 +140,6 @@ def isValidMove(currentBoard, rowNum, starNum):
 
     # else if the number of stars to remove is larger than the current stars in the row, return false
     elif starNum > starCount:
-        print(f"starNum given = {starNum} current starCount in {rowNum} = {starCount}")
         return False
 
     # otherwise return true
@@ -150,8 +179,6 @@ def playNim():
         ['*','*'],
         ['*']]
 
-    # display the starting board
-    displayCurrentBoard(currentBoard)
 
     # keep track of the number of rounds (used to determine the currentPlayer number)
     round = 1
@@ -165,51 +192,32 @@ def playNim():
         else:
             currentPlayer = 1
 
+        # display the currentBoard
+        displayCurrentBoard(currentBoard)
+
         # call playerPrompt function, which will return the updated board
         updatedBoard = playerPrompt(currentPlayer, currentBoard)
 
-        displayCurrentBoard(updatedBoard)
+        # if updatedBoard and the currentBoard are NOT the same
+        # meaning changes were made (because there were no errors)
+        if not boardsAreEqual(currentBoard, updatedBoard):
+            # set the currentBoard equal to the updatedBoard
+            currentBoard = updatedBoard
+            # increment the round number by 1 to advance to the next player
+            round += 1
+            print()
+        else:
+            print()
 
-        # FIXME if the updatedBoard and the currentBoard are the same, then do not update the round number
-            # call playerPrompt again
-        # else they are different
-            # increment the round number by 1
+    # if the PREVIOUS ROUND is even, the lastPlayer is player 2
+    if (round - 1) % 2 == 0:
+        lastPlayer = 2
+    # otherwise the PREVIOUS ROUND is odd and the lastPlayer is player 1
+    else:
+        lastPlayer = 1
+
+    print(f'Congratulations, Player {lastPlayer}! You win!')
 
 if __name__ == '__main__':
+    # call playNim to start the program
     playNim()
-
-
-
-        # check if game is finished
-        # if yes, display the current player as the winner (they made the board empty) and end loop
-        # otherwise continue
-
-    # prompt player 1
-        #display Player 1
-        # ask player 1 for row num
-        # ask player 1 for stars to remove
-
-        # determine if the move is valid
-            # if yes
-                # update the board and display
-                    # check if game is finished
-                    # if yes, display the current player as the winner (they made the board empty) and end loop
-                    # otherwise continue
-            # if no
-                # error
-                # re-display the current board and re-prompt current player
-
-    # prompt player 2
-        # display Player 2
-        # ask player 2 for row num
-        # ask player 2 for stars to remove
-
-        # determine if the move is valid
-            # if yes
-                # update the board and display
-                    # check if game is finished
-                    # if yes, display the current player as the winner (they made the board empty) and end loop
-                    # otherwise continue
-            # if no
-                # error
-                # re-display the current board and re-prompt current player
