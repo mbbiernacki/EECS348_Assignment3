@@ -62,16 +62,29 @@ def boardsAreEqual(currentBoard, updatedBoard):
 # function to update the current game board
 # SOURCE: ChatGPT, Myself
 def updateBoard(currentBoard, rowNum, starNum):
+    # first, create a deep copy of the currentBoard to avoid modifying the original
+    # this is because we will need the currentBoard later for comparisons
     newBoard = copy.deepcopy(currentBoard)
+
+    # convert the given index (1-based) into 0-based index for use within python
     rowIndex = rowNum - 1
 
-    # Find indices of actual stars in the row
+    # scan through the selected row and find the indices of all * characters
+    # in that row
     starIndices = [i for i, val in enumerate(newBoard[rowIndex]) if val == '*']
 
-    # Remove stars from the **end** of the row
+    # removes stars from the rightmost side (why we use -1-i)
+    # of the row using a for loop
     for i in range(min(starNum, len(starIndices))):
+        # for clarity, rowIndex is the index of the row we want to modify
+        # newBoard[rowIndex] provides the entire row
+        # [starIndices[-1-i]] is the list where * characters appear in the row
+
+        # essentially, the line of code below accesses the exact position in the row where a star is located
+        # and replaces that star with ' '
         newBoard[rowIndex][starIndices[-1 - i]] = ' '
 
+    # return the newBoard that has been updated
     return newBoard
 
 
@@ -113,6 +126,7 @@ def isValidMove(currentBoard, rowNum, starNum):
 
     # check that the rowNum is a valid option (can only be 1 through 5)
     if rowNum not in range(1,6):
+        print("ERROR: Row number must be between 1-5.")
         return False
 
     # the following code checks that there are stars in that row to be removed
@@ -136,13 +150,13 @@ def isValidMove(currentBoard, rowNum, starNum):
     # if the starCount == 0 after the for loop, then return false
     if starCount == 0:
         # display an error message
-        print(f"ERROR: No stars in row {rowNum} to remove")
+        print(f"ERROR: No star(s) in row {rowNum} to remove")
         return False
 
     # else if the number of stars to remove is larger than the current stars in the row, return false
     elif starNum > starCount:
         # display an error message
-        print(f"ERROR: Cannot remove {starNum} stars from row {rowNum}, there are only {starCount} stars available to remove.")
+        print(f"ERROR: Cannot remove {starNum} star(s) from row {rowNum}, there are only {starCount} star(s) available to remove.")
         return False
 
     # otherwise return true
@@ -171,7 +185,7 @@ def displayCurrentBoard(currentBoard):
         print()
 
 # function to initialize and play a game of nim until the user decides to quit
-# SOURCE: Myself
+# SOURCE: Myself, ChatGPT
 def playNim():
 
     # use a 2D array to initialize the game board
@@ -219,6 +233,7 @@ def playNim():
     else:
         lastPlayer = 1
 
+    # display a message to the last player (the player that made the winning move)
     print(f'Congratulations, Player {lastPlayer}! You win!')
 
 if __name__ == '__main__':
