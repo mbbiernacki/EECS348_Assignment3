@@ -88,11 +88,11 @@ def playerPrompt(playerNum, currentBoard):
     # verify the input rowNum and starNum are integers
     # print appropriate error messages and return the currentBoard as needed
     if not rowNum.isdigit():
-        print("ERROR -- Row number must be an integer.")
+        print("ERROR: Row number must be an integer.")
         return currentBoard
 
     if not starNum.isdigit():
-        print("ERROR -- Star number must be an integer.")
+        print("ERROR: Star number must be an integer.")
         return currentBoard
 
     # if the move is valid
@@ -103,8 +103,7 @@ def playerPrompt(playerNum, currentBoard):
 
     # otherwise the move is not valid
     else:
-        # display an error message and return the currentBoard
-        print("ERROR: Invalid move")
+        # return the currentBoard
         return currentBoard
 
 
@@ -136,10 +135,14 @@ def isValidMove(currentBoard, rowNum, starNum):
 
     # if the starCount == 0 after the for loop, then return false
     if starCount == 0:
+        # display an error message
+        print(f"ERROR: No stars in row {rowNum} to remove")
         return False
 
     # else if the number of stars to remove is larger than the current stars in the row, return false
     elif starNum > starCount:
+        # display an error message
+        print(f"ERROR: Cannot remove {starNum} stars from row {rowNum}, there are only {starCount} stars available to remove.")
         return False
 
     # otherwise return true
