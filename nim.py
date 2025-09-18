@@ -184,7 +184,7 @@ def displayCurrentBoard(currentBoard):
         # after iterating through the row, create a newline for the next row
         print()
 
-# function to initialize and play a game of nim until the user decides to quit
+# function to initialize and play a game of nim until there is a winner
 # SOURCE: Myself, ChatGPT
 def playNim():
 
